@@ -12,7 +12,7 @@ code and a manual this spring. With OBLIMAP 2.0 fast embedded on-line
 coupling of an ice model within a GCM is now possible due to a dramatic
 performance gain.
 
-# Coding task as initialy intended: the computational challenge
+# Coding task as initially intended: the computational challenge
 OBLIMAP 2.0 is a sequential code and consists of two main phases: the
 scanning phase and the fast mapping phase. Despite the large performance gain
 for the scanning phase, it would be computational expensive if frequent coupling
@@ -23,7 +23,9 @@ the scanning phase would be required for each adaptation of the grid.
 By combining the current fast scanning mode with a parallel MPI implementation
 we expect that the time consumption of OBLIMAP's scanning phase reduces
 sufficiently, in order to allow on-line coupling with adaptive grids, which we expect
-to be a near future demand.
+to be a near future demand. Using more processors the fast scan method could be left 
+out totally, and the full scan method will be parallelized using one processor for each 
+destination grid point. The latter approach holds even for unstructered grids.
 
 # Code
 The OBLIMAP 1.0 code (release 2010) is available at the Github project: https://github.com/treerink/oblimap-1.0
