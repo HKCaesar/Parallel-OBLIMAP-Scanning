@@ -7,10 +7,9 @@ ocean via various feedback mechanisms. In order to simulate this coupled
 system General Circulation Models (GCM's) are coupled with ice dynamical
 models. Our OBLIMAP-package is designed for this purpose and after its first
 open source release (see http://www.geosci-model-dev.net/3/13/2010/gmd-3-13-2010.html) 
-we will submit OBLIMAP 2.0 as a GMD model paper including the
-code and a manual this spring. With OBLIMAP 2.0 fast embedded on-line
-coupling of an ice model within a GCM is now possible due to a dramatic
-performance gain.
+With OBLIMAP 2.0 (see http://www.geosci-model-dev-discuss.net/gmd-2016-124/)
+fast embedded on-line coupling of an ice model within a GCM is now possible due 
+to a dramatic performance gain.
 
 # Coding task as initially intended: the computational challenge
 OBLIMAP 2.0 is a sequential code and consists of two main phases: the
@@ -25,7 +24,10 @@ we expect that the time consumption of OBLIMAP's scanning phase reduces
 sufficiently, in order to allow on-line coupling with adaptive grids, which we expect
 to be a near future demand. Using more processors the fast scan method could be left 
 out totally, and the full scan method will be parallelized using one processor for each 
-destination grid point. The latter approach holds even for unstructered grids.
+destination grid point. The latter approach holds even for unstructered grids. The
+final part of the discussion of the manuscript which is currently published under
+http://www.geosci-model-dev-discuss.net/gmd-2016-124/ discusses more parallel 
+implementation options.
 
 # Code
 The OBLIMAP 1.0 code (release 2010) is available at the Github project: https://github.com/treerink/oblimap-1.0
