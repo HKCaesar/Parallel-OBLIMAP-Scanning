@@ -25,13 +25,13 @@ sufficiently, in order to allow on-line coupling with adaptive grids, which we e
 to be a near future demand. Using more processors the fast scan method could be left 
 out totally, and the full scan method will be parallelized using one processor for each 
 destination grid point. The latter approach holds even for unstructered grids. The
-final part of the discussion of the manuscript which is currently published under
+final part of the discussion (see page 17 line 15) of the manuscript which is currently published under
 http://www.geosci-model-dev-discuss.net/gmd-2016-124/ discusses more parallel 
 implementation options.
 
 # Code
-The OBLIMAP 1.0 code (release 2010) is available at the Github project: https://github.com/treerink/oblimap-1.0
-The OBLIMAP 2.0 code and manual (release 2016) are available at the Github project: https://github.com/treerink/oblimap-2.0
+The OBLIMAP 1.0 code (release 2010) is available at the Github project: https://github.com/oblimap/oblimap-1.0
+The OBLIMAP 2.0 code and manual (release 2016) are available at the Github project: https://github.com/oblimap/oblimap-2.0
 In this project OBLIMAP 2.0 will be subject of parallelization.
 
 # Data formats and data links
