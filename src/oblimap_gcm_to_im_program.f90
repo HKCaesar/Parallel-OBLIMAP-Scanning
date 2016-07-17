@@ -38,17 +38,30 @@
 !
 
 PROGRAM oblimap_gcm_to_im_program
-  USE oblimap_configuration_module, ONLY: initialize_config_variables, oblimap_licence
+  USE oblimap_configuration_module, ONLY: C, initialize_config_variables, oblimap_licence
   USE oblimap_gcm_to_im_mapping_module, ONLY: oblimap_gcm_to_im_mapping
   USE mpi
   IMPLICIT NONE
  
   INTEGER :: ierr
+  INTEGER :: processor_id
+  INTEGER :: number_of_processors
+  INTEGER :: error_code
  
   CALL MPI_Init(ierr)
 
+  CALL MPI_COMM_RANK(MPI_COMM_WORLD, processor_id, ierr)
+  CALL MPI_COMM_SIZE(MPI_COMM_WORLD, number_of_processors, ierr)
+
   ! Read the configuration file and initialization of the struckt C%:
   CALL initialize_config_variables()
+  
+  IF(number_of_processors > C%NY) THEN
+   WRITE(UNIT=*, FMT='(A)') ' PROGRAM STOP: You are using too many processors, take less!'
+   WRITE(*,*) 
+   WRITE(*,*) 
+   CALL MPI_ABORT(MPI_COMM_WORLD, error_code, ierr)
+  END IF
 
   ! Output: -
   CALL oblimap_licence('oblimap_gcm_to_im_program')
