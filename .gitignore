@@ -26,3 +26,7 @@
 *.exe
 *.out
 *.app
+
+
+oblimap_gcm_to_im_program
+*.txt
