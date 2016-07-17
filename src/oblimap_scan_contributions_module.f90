@@ -1303,11 +1303,6 @@ CONTAINS
 
     ! Local variables:
     INTEGER                                        :: unit_number     = 107
-    INTEGER                                        :: unit_number_alt = 4223
-    INTEGER                                        :: RetCode
-    INTEGER                                        :: processor_id
-    INTEGER                                        :: ierr
-    CHARACTER(LEN=maximum_contributions)           :: line
 
     ! Opening the scanned file:
     OPEN(UNIT=unit_number, FILE=TRIM(C%scanned_projection_data_filename))
