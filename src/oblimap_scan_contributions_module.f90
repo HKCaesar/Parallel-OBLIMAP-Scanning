@@ -1,3 +1,6 @@
+! This module will be subject to the parallelisation project
+
+
 ! File name: oblimap_scan_contributions_module.f90
 !
 ! Copyright (C) 2016 Thomas Reerink.
