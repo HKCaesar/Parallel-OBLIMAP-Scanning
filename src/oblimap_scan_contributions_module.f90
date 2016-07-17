@@ -50,6 +50,8 @@ MODULE oblimap_scan_contributions_module
     REAL(dp) :: distance      ! distance of this nearest point relative to the IM point (m,n)
   END TYPE triplet
 
+
+
   ! In case there is no contributions, the distance is set to a huge number:C%large_distance = 1.0E8_dp, and the indices to -999999
  !TYPE(triplet), PARAMETER :: no_contribution = triplet(-999999, -999999, 1.0E8_dp)
 
@@ -403,6 +405,7 @@ CONTAINS
     IF(C%scan_search_block_size == -3) highest_scan_search_block_size = highest_scan_search_block_size - 2
     IF(C%oblimap_message_level > 0) WRITE(UNIT=*,FMT='(/A, I6/)') ' The highest dynamic scan_search_block_size was: ', highest_scan_search_block_size
 
+    CALL FLUSH(C%unit_scanning_file_content)
     ! Closing the the scanned file:
     CLOSE(UNIT=C%unit_scanning_file_content)
 
@@ -761,6 +764,7 @@ CONTAINS
 
     ! Closing the the scanned file:
     CLOSE(UNIT=C%unit_scanning_file_content)
+    CALL FLUSH(C%unit_scanning_file_content)
 
     ! Output: -
     CALL write_the_scanned_projection_data_file(advised_scan_parameter, highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution, maximum_contributions, gcm_to_im_direction = .TRUE.)
@@ -1013,6 +1017,7 @@ CONTAINS
     IF(C%scan_search_block_size == -3) highest_scan_search_block_size = highest_scan_search_block_size - 2
     IF(C%oblimap_message_level > 0) WRITE(UNIT=*,FMT='(/A, I6/)') ' The highest dynamic scan_search_block_size was: ', highest_scan_search_block_size
 
+    CALL FLUSH(C%unit_scanning_file_content)
     ! Closing the the scanned file:
     CLOSE(UNIT=C%unit_scanning_file_content)
 
@@ -1262,6 +1267,7 @@ CONTAINS
 
     DEALLOCATE(contribution)
 
+    CALL FLUSH(C%unit_scanning_file_content)
     ! Closing the the scanned file:
     CLOSE(UNIT=C%unit_scanning_file_content)
 
@@ -1284,6 +1290,7 @@ CONTAINS
   SUBROUTINE write_the_scanned_projection_data_file(advised_scan_parameter, highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution, maximum_contributions, gcm_to_im_direction)
     ! This routine writes the header of the scanned file: the C%scanned_projection_data_filename file.
     USE oblimap_configuration_module, ONLY: dp, C, oblimap_scan_parameter_type
+    USE mpi
     IMPLICIT NONE
 
     ! Input variables:
@@ -1295,7 +1302,12 @@ CONTAINS
     LOGICAL                           , INTENT(IN) :: gcm_to_im_direction                   ! This variable has to be TRUE for the GCM -> IM mapping direction, and FALSE vice versa.
 
     ! Local variables:
-    INTEGER                                        :: unit_number = 107
+    INTEGER                                        :: unit_number     = 107
+    INTEGER                                        :: unit_number_alt = 4223
+    INTEGER                                        :: RetCode
+    INTEGER                                        :: processor_id
+    INTEGER                                        :: ierr
+    CHARACTER(LEN=maximum_contributions)           :: line
 
     ! Opening the scanned file:
     OPEN(UNIT=unit_number, FILE=TRIM(C%scanned_projection_data_filename))
@@ -1407,13 +1419,15 @@ CONTAINS
      WRITE(UNIT=unit_number,  FMT='( I20, A, I8, A)') amount_of_mapped_points, '     # The number of mapped GCM points from which ', number_points_no_contribution, ' points have no contribution.'
     END IF
     WRITE(UNIT=unit_number,   FMT='( A        )') '# '
-
-    ! Closing the the scanned file:
+    ! Closing the the sid file:
     CLOSE(UNIT=unit_number)
-
+ 
     ! Appending the content to the header:
-    CALL SYSTEM('more '//TRIM(C%filename_scanned_content)//' >> '//TRIM(C%scanned_projection_data_filename))
+    CALL SYSTEM('cat '//TRIM(C%filename_scanned_content)//' >> '//TRIM(C%scanned_projection_data_filename))
     CALL SYSTEM('rm -f '//TRIM(C%filename_scanned_content))
+
+
+
   END SUBROUTINE write_the_scanned_projection_data_file
 
 

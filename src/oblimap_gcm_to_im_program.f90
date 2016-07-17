@@ -55,7 +55,7 @@ PROGRAM oblimap_gcm_to_im_program
 
   ! Calling the oblimap_gcm_to_im_mapping :
   CALL oblimap_gcm_to_im_mapping()
-
+  
   CALL MPI_Finalize(ierr)
 
 END PROGRAM oblimap_gcm_to_im_program

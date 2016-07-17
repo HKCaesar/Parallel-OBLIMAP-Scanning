@@ -19,21 +19,21 @@ if($#argv == 0 || $#argv == 2) then
  endif
 
 
- ./src/oblimap_gcm_to_im_program ${config_file_for_gcm_to_im}
+ ibrun -np 1 ./src/oblimap_gcm_to_im_program ${config_file_for_gcm_to_im}
  
- # The post profiling:
- if(-e gmon.out) then
-  gprof ./src/oblimap_gcm_to_im_program gmon.out > profiling-oblimap_gcm_to_im_program.txt
-  rm -f gmon.out
- endif
-
- ./src/oblimap_im_to_gcm_program ${config_file_for_im_to_gcm}
- 
- # The post profiling:
- if(-e gmon.out) then
-  gprof ./src/oblimap_im_to_gcm_program gmon.out > profiling-oblimap_im_to_gcm_program.txt
-  rm -f gmon.out
- endif
+#  # The post profiling:
+#  if(-e gmon.out) then
+#   gprof ./src/oblimap_gcm_to_im_program gmon.out > profiling-oblimap_gcm_to_im_program.txt
+#   rm -f gmon.out
+#  endif
+# 
+#  ./src/oblimap_im_to_gcm_program ${config_file_for_im_to_gcm}
+#  
+#  # The post profiling:
+#  if(-e gmon.out) then
+#   gprof ./src/oblimap_im_to_gcm_program gmon.out > profiling-oblimap_im_to_gcm_program.txt
+#   rm -f gmon.out
+#  endif
 
 
 else
