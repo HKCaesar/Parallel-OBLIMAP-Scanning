@@ -51,7 +51,8 @@
 #     http://www.gnu.org/software/make/manual/make.html
 
 # Include below the Makefile.include which matches with your fortran compiler:
-include Makefile.gfortran
+#include Makefile.gfortran
+include Makefile.ifort-stampede
 #include Makefile.gfortran-mp-4.9-mac
 #include Makefile.gfortran-lisa
 #include Makefile.ifort-lisa
