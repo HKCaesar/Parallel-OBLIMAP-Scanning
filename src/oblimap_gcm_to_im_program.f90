@@ -40,7 +40,12 @@
 PROGRAM oblimap_gcm_to_im_program
   USE oblimap_configuration_module, ONLY: initialize_config_variables, oblimap_licence
   USE oblimap_gcm_to_im_mapping_module, ONLY: oblimap_gcm_to_im_mapping
+  USE mpi
   IMPLICIT NONE
+ 
+  INTEGER :: ierr
+ 
+  CALL MPI_Init(ierr)
 
   ! Read the configuration file and initialization of the struckt C%:
   CALL initialize_config_variables()
@@ -50,5 +55,7 @@ PROGRAM oblimap_gcm_to_im_program
 
   ! Calling the oblimap_gcm_to_im_mapping :
   CALL oblimap_gcm_to_im_mapping()
+
+  CALL MPI_Finalize(ierr)
 
 END PROGRAM oblimap_gcm_to_im_program
