@@ -72,6 +72,7 @@ CONTAINS
     ! file. With the indices and the distances of the contributing points the GCM fields can be mapped fast and simultaneously
     ! on to the IM grid.
     USE oblimap_configuration_module, ONLY: dp, C, oblimap_scan_parameter_type
+    USE MPI
     IMPLICIT NONE
 
     ! Input variables:
@@ -116,6 +117,8 @@ CONTAINS
     LOGICAL,       DIMENSION(  C%NLON,C%NLAT)             :: mask
     REAL(dp)                                              :: local_gcm_grid_distance           ! The distance between two local GCM grid neighbour points
 
+    INTEGER                                               :: ierror
+
     IF(lat_gcm(1,1) < lat_gcm(1,C%NLAT)) THEN
      latitude_parallel_to_grid_numbers = .TRUE.
     ELSE
@@ -140,6 +143,7 @@ CONTAINS
      number_of_situations = 1
     END IF
 
+ IF(C%processor_id_process_dependent == 0) &
     ! Opening the file to which the coordinates of the nearest projected points are written, which will be the content of the scanned file:
     OPEN(UNIT=C%unit_scanning_file_content, FILE=TRIM(C%filename_scanned_content))
 
@@ -388,6 +392,7 @@ CONTAINS
        ! The nearest contribution is selected:
        nearest_contribution(m,n) = contribution(MINLOC(contribution(:,m,n)%distance, 1),m,n)
 
+ IF(C%processor_id_process_dependent == 0) THEN
        WRITE(UNIT=C%unit_scanning_file_content, FMT='(3I6)', ADVANCE='NO') m, n, count_contributions
        DO loop = 1, 4
         ! Filter the appropriate contributions (leave out the quadrants in which no contributing point is found, e.g. at the grid border):
@@ -398,6 +403,7 @@ CONTAINS
        WRITE(UNIT=C%unit_scanning_file_content, FMT='(A)') ''
        amount_of_mapped_points = amount_of_mapped_points + 1
       END IF
+ END IF
 
     END DO
     END DO
@@ -405,12 +411,16 @@ CONTAINS
     IF(C%scan_search_block_size == -3) highest_scan_search_block_size = highest_scan_search_block_size - 2
     IF(C%oblimap_message_level > 0) WRITE(UNIT=*,FMT='(/A, I6/)') ' The highest dynamic scan_search_block_size was: ', highest_scan_search_block_size
 
-    CALL FLUSH(C%unit_scanning_file_content)
+   !CALL FLUSH(C%unit_scanning_file_content)
     ! Closing the the scanned file:
+ IF(C%processor_id_process_dependent == 0) &
     CLOSE(UNIT=C%unit_scanning_file_content)
 
     ! Output: -
+ write(*,*) C%processor_id_process_dependent
+ IF(C%processor_id_process_dependent == 0) &
     CALL write_the_scanned_projection_data_file(advised_scan_parameter, highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution, maximum_contributions = 4, gcm_to_im_direction = .TRUE.)
+    CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
   END SUBROUTINE scan_with_quadrant_method_gcm_to_im
 
 
@@ -1420,9 +1430,6 @@ CONTAINS
     ! Appending the content to the header:
     CALL SYSTEM('cat '//TRIM(C%filename_scanned_content)//' >> '//TRIM(C%scanned_projection_data_filename))
     CALL SYSTEM('rm -f '//TRIM(C%filename_scanned_content))
-
-
-
   END SUBROUTINE write_the_scanned_projection_data_file
 
 

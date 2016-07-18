@@ -42,26 +42,38 @@ PROGRAM oblimap_gcm_to_im_program
   USE oblimap_gcm_to_im_mapping_module, ONLY: oblimap_gcm_to_im_mapping
   USE mpi
   IMPLICIT NONE
- 
+
   INTEGER :: ierr
-  INTEGER :: processor_id
+  INTEGER :: processor_id_process_dependent
   INTEGER :: number_of_processors
   INTEGER :: error_code
- 
+
   CALL MPI_Init(ierr)
 
-  CALL MPI_COMM_RANK(MPI_COMM_WORLD, processor_id, ierr)
+  CALL MPI_COMM_RANK(MPI_COMM_WORLD, processor_id_process_dependent, ierr)
   CALL MPI_COMM_SIZE(MPI_COMM_WORLD, number_of_processors, ierr)
+  C%processor_id_process_dependent = processor_id_process_dependent
+  C%number_of_processors = number_of_processors
 
   ! Read the configuration file and initialization of the struckt C%:
   CALL initialize_config_variables()
-  
-  IF(number_of_processors > C%NY) THEN
+
+  IF(C%number_of_processors > C%NY) THEN
    WRITE(UNIT=*, FMT='(A)') ' PROGRAM STOP: You are using too many processors, take less!'
-   WRITE(*,*) 
-   WRITE(*,*) 
+   WRITE(*,*)
+   WRITE(*,*)
    CALL MPI_ABORT(MPI_COMM_WORLD, error_code, ierr)
   END IF
+
+  IF(MOD(C%NY, C%number_of_processors) == 0) THEN
+   C%max_nr_of_lines_per_partition_block = (C%NY / C%number_of_processors)
+  ELSE
+   C%max_nr_of_lines_per_partition_block = (C%NY / C%number_of_processors) + 1
+  END IF
+  C%psi_process_dependent = C%processor_id_process_dependent * C%max_nr_of_lines_per_partition_block + 1
+  
+  write(*,*) C%processor_id_process_dependent, ' C%number_of_processors  = ', C%number_of_processors    , 'NY = ', C%NY, ' C%max_nr_of_lines_per_partition_block = ', C%max_nr_of_lines_per_partition_block, 'load unbalance = ', C%number_of_processors * C%max_nr_of_lines_per_partition_block - C%NY
+  write(*,*) C%processor_id_process_dependent, ' C%psi_process_dependent = ', C%psi_process_dependent
 
   ! Output: -
   CALL oblimap_licence('oblimap_gcm_to_im_program')

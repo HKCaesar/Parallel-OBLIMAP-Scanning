@@ -277,6 +277,11 @@ MODULE oblimap_configuration_module
         CHARACTER(LEN=24)                          :: OBLIMAP_ERROR                       ! The allocation is exactly, so it is possible to omit a TRIM on this string
         CHARACTER(LEN=26)                          :: OBLIMAP_WARNING                     ! The allocation is exactly, so it is possible to omit a TRIM on this string
         CHARACTER(LEN=25)                          :: OBLIMAP_ADVICE                      ! The allocation is exactly, so it is possible to omit a TRIM on this string
+
+        INTEGER                                    :: processor_id_process_dependent
+        INTEGER                                    :: number_of_processors
+        INTEGER                                    :: max_nr_of_lines_per_partition_block ! The maximum numberr of lines per partition block, in a MPI parallel approach
+        INTEGER                                    :: psi_process_dependent               ! Partition starting index, in a MPI parallel approach
       END TYPE constants_type
 
       ! C is the 'struct' containing all the Constants from the config file and/or the defaults
