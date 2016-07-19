@@ -129,7 +129,8 @@ CONTAINS
     INTEGER                                               :: amount_of_mapped_points_reduced       
     INTEGER                                               :: number_points_no_contribution_reduced 
    !INTEGER                                               :: maximum_contributions_reduced         
-
+    real(dp)                                              :: t1,t2
+    
     IF(lat_gcm(1,1) < lat_gcm(1,C%NLAT)) THEN
      latitude_parallel_to_grid_numbers = .TRUE.
     ELSE
@@ -170,8 +171,8 @@ CONTAINS
     ELSE
      m_end = C%psi_process_dependent + C%max_nr_of_lines_per_partition_block - 1
     END IF
-   !write(*,*) C%processor_id_process_dependent, m_start, m_end
-
+   write(*,*) C%processor_id_process_dependent, m_start, m_end,C%NX
+    t1 = MPI_Wtime()
     DO m = m_start, m_end
 
       IF(m >= m_message) THEN
@@ -446,6 +447,9 @@ CONTAINS
 
     END DO
     END DO
+    t2 = MPI_Wtime()
+
+    write(*,*)"time",t2-t1
 
     IF(C%scan_search_block_size == -3) highest_scan_search_block_size = highest_scan_search_block_size - 2
     IF(C%oblimap_message_level > 0) WRITE(UNIT=*,FMT='(/A, I6/)') ' The highest dynamic scan_search_block_size was: ', highest_scan_search_block_size

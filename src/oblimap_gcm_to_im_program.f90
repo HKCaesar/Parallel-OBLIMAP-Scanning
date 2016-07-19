@@ -48,6 +48,9 @@ PROGRAM oblimap_gcm_to_im_program
   INTEGER :: number_of_processors
   INTEGER :: error_code
 
+  REAL :: ratioproc
+  INTEGER :: m_start,m_end 
+  
   CALL MPI_Init(ierr)
 
   CALL MPI_COMM_RANK(MPI_COMM_WORLD, processor_id_process_dependent, ierr)
@@ -71,6 +74,9 @@ PROGRAM oblimap_gcm_to_im_program
    C%max_nr_of_lines_per_partition_block = (C%NX / C%number_of_processors) + 1
   END IF
   C%psi_process_dependent = C%processor_id_process_dependent * C%max_nr_of_lines_per_partition_block + 1
+
+
+
   
   write(*,*) C%processor_id_process_dependent, ' C%number_of_processors  = ', C%number_of_processors    , 'NY = ', C%NX, ' C%max_nr_of_lines_per_partition_block = ', C%max_nr_of_lines_per_partition_block, 'load unbalance = ', C%number_of_processors * C%max_nr_of_lines_per_partition_block - C%NX
   write(*,*) C%processor_id_process_dependent, ' C%psi_process_dependent = ', C%psi_process_dependent
