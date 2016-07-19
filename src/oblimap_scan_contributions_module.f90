@@ -117,18 +117,16 @@ CONTAINS
     LOGICAL,       DIMENSION(  C%NLON,C%NLAT)             :: mask
     REAL(dp)                                              :: local_gcm_grid_distance           ! The distance between two local GCM grid neighbour points
 
+    ! The variables related to the parallel implementation:
     INTEGER                                               :: ierror
     CHARACTER(4)                                          :: process_label
     CHARACTER(256)                                        :: filename_scanned_content
     INTEGER                                               :: process_counter
     INTEGER                                               :: m_start
     INTEGER                                               :: m_end
-  !!INTEGER                                               :: n_start
-  !!INTEGER                                               :: n_end
     INTEGER                                               :: highest_scan_search_block_size_reduced
     INTEGER                                               :: amount_of_mapped_points_reduced       
     INTEGER                                               :: number_points_no_contribution_reduced 
-   !INTEGER                                               :: maximum_contributions_reduced         
 
     IF(lat_gcm(1,1) < lat_gcm(1,C%NLAT)) THEN
      latitude_parallel_to_grid_numbers = .TRUE.
@@ -154,7 +152,6 @@ CONTAINS
      number_of_situations = 1
     END IF
 
-!IF(C%processor_id_process_dependent == 0) &
     ! Opening the file to which the coordinates of the nearest projected points are written, which will be the content of the scanned file:
     WRITE(process_label, '(I0.4)') C%processor_id_process_dependent
     filename_scanned_content = TRIM(C%filename_scanned_content)//'-'//TRIM(process_label)
@@ -162,7 +159,6 @@ CONTAINS
 
     ! For each IM grid point the four nearest projected GCM points are determined:
     WRITE(UNIT=*,FMT='(A)') '  The progress of the OBLIMAP scanning phase is at:'
-  !!DO m = 1, C%NX
 
     m_start = C%psi_process_dependent
     IF(C%processor_id_process_dependent == C%number_of_processors - 1) THEN
@@ -170,7 +166,6 @@ CONTAINS
     ELSE
      m_end = C%psi_process_dependent + C%max_nr_of_lines_per_partition_block - 1
     END IF
-   !write(*,*) C%processor_id_process_dependent, m_start, m_end
 
     DO m = m_start, m_end
 
@@ -186,24 +181,11 @@ CONTAINS
     
     DO n = 1, C%NY
 
-!   n_start = C%psi_process_dependent
-!   IF(C%processor_id_process_dependent == C%number_of_processors - 1) THEN
-!    n_end = C%NY
-!   ELSE
-!    n_end = C%psi_process_dependent + C%max_nr_of_lines_per_partition_block - 1
-!   END IF
-!  !write(*,*) C%processor_id_process_dependent, n_start, n_end
-
-!   DO n = n_start, n_end
-
-    !!IF(C%full_scanning_mode .OR. (m == 1 .AND. n == 1)) THEN
-   !!!IF(C%full_scanning_mode .OR. (m == 1 .AND. n == n_start)) THEN
       IF(C%full_scanning_mode .OR. (m == m_start .AND. n == 1)) THEN
        ! For the very first point always a full scan is conducted. In case the full_scanning_mode = TRUE, the full scan is conducted at any point
        do_full_scan = .TRUE.
        pivot_contribution = no_contribution
       ELSE IF(n == 1) THEN
-   !!!ELSE IF(n == n_start) THEN
        ! Low frequent situation (At n == 1, the starting and most left column, only a contribution of the previous row can be used if it exits)
        IF(nearest_contribution(m-1,n)%distance /= C%large_distance) THEN
         do_full_scan = .FALSE.
@@ -216,7 +198,6 @@ CONTAINS
        ! Most frequent situation (continuing at the same row): take the contribution of that neighbour point which is located at the previous column
        do_full_scan = .FALSE.
        pivot_contribution = nearest_contribution(m,n-1)
-    !!ELSE IF(m == 1) THEN
       ELSE IF(m == m_start) THEN
        ! Low frequent situation (If no neighbour contribution at the same row is found, it is not possible to try the previous row, because m == 1 is the lowest and first scanned row)
        do_full_scan = .TRUE.
@@ -431,7 +412,6 @@ CONTAINS
        ! The nearest contribution is selected:
        nearest_contribution(m,n) = contribution(MINLOC(contribution(:,m,n)%distance, 1),m,n)
 
-!IF(C%processor_id_process_dependent == 0) THEN
        WRITE(UNIT=C%unit_scanning_file_content + C%processor_id_process_dependent, FMT='(3I6)', ADVANCE='NO') m, n, count_contributions
        DO loop = 1, 4
         ! Filter the appropriate contributions (leave out the quadrants in which no contributing point is found, e.g. at the grid border):
@@ -442,7 +422,6 @@ CONTAINS
        WRITE(UNIT=C%unit_scanning_file_content + C%processor_id_process_dependent, FMT='(A)') ''
        amount_of_mapped_points = amount_of_mapped_points + 1
       END IF
-!END IF
 
     END DO
     END DO
@@ -450,53 +429,42 @@ CONTAINS
     IF(C%scan_search_block_size == -3) highest_scan_search_block_size = highest_scan_search_block_size - 2
     IF(C%oblimap_message_level > 0) WRITE(UNIT=*,FMT='(/A, I6/)') ' The highest dynamic scan_search_block_size was: ', highest_scan_search_block_size
 
-   !CALL FLUSH(C%unit_scanning_file_content)
     ! Closing the the scanned file:
-!IF(C%processor_id_process_dependent == 0) &
     CLOSE(UNIT=C%unit_scanning_file_content + C%processor_id_process_dependent)
 
-    ! Output: -
-!write(*,*) C%processor_id_process_dependent
 
-write(*,*) C%processor_id_process_dependent, 'before reduce: ', highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution
+   !write(*,*) C%processor_id_process_dependent, 'before reduce: ', highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution
 
-! In/Output: highest_scan_search_block_size
-CALL MPI_REDUCE (highest_scan_search_block_size,  highest_scan_search_block_size_reduced, 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
+    ! In/Output: highest_scan_search_block_size
+    CALL MPI_REDUCE (highest_scan_search_block_size,  highest_scan_search_block_size_reduced, 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
 
-! In/Output: amount_of_mapped_points
-CALL MPI_REDUCE (amount_of_mapped_points       ,  amount_of_mapped_points_reduced       , 1, MPI_INTEGER , MPI_SUM , 0, MPI_COMM_WORLD , ierror)
+    ! In/Output: amount_of_mapped_points
+    CALL MPI_REDUCE (amount_of_mapped_points       ,  amount_of_mapped_points_reduced       , 1, MPI_INTEGER , MPI_SUM , 0, MPI_COMM_WORLD , ierror)
 
-! In/Output: number_points_no_contribution
-CALL MPI_REDUCE (number_points_no_contribution ,  number_points_no_contribution_reduced , 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
+    ! In/Output: number_points_no_contribution
+    CALL MPI_REDUCE (number_points_no_contribution ,  number_points_no_contribution_reduced , 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
 
-! In/Output: maximum_contributions
-!CALL MPI_REDUCE (maximum_contributions         , maximum_contributions_reduced         , 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
+    highest_scan_search_block_size = highest_scan_search_block_size_reduced
+    amount_of_mapped_points        = amount_of_mapped_points_reduced       
+    number_points_no_contribution  = number_points_no_contribution_reduced 
 
-highest_scan_search_block_size = highest_scan_search_block_size_reduced
-amount_of_mapped_points        = amount_of_mapped_points_reduced       
-number_points_no_contribution  = number_points_no_contribution_reduced 
-!maximum_contributions          = maximum_contributions_reduced         
-
-write(*,*)  C%processor_id_process_dependent, 'after reduce: ', highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution
+   !write(*,*)  C%processor_id_process_dependent, 'after reduce: ', highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution
 
 
-IF(C%processor_id_process_dependent == 0) &
-    CALL write_the_scanned_projection_data_file(advised_scan_parameter, highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution, maximum_contributions = 4, gcm_to_im_direction = .TRUE.)
-CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
+    IF(C%processor_id_process_dependent == 0) &
+     ! Output: -
+     CALL write_the_scanned_projection_data_file(advised_scan_parameter, highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution, maximum_contributions = 4, gcm_to_im_direction = .TRUE.)
+    CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
     ! Serialized Output -- still doesn't guarentee order
     DO process_counter = 0, C%number_of_processors - 1
      IF(process_counter == C%processor_id_process_dependent) THEN
+      ! Appending the content to the header:
       CALL SYSTEM('cat '//TRIM(filename_scanned_content)//' >> '//TRIM(C%scanned_projection_data_filename))
      END IF
      CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
     END DO
 
-
- 
-    ! Appending the content to the header:
-  !!CALL SYSTEM('cat '//TRIM(filename_scanned_content)//' >> '//TRIM(C%scanned_projection_data_filename))
-   !CALL SYSTEM('rm -f '//TRIM(C%filename_scanned_content))
    !CALL SYSTEM('rm -f '//TRIM(C%filename_scanned_content)//'-'//TRIM(C%processor_id_process_dependent))
   END SUBROUTINE scan_with_quadrant_method_gcm_to_im
 
@@ -851,7 +819,6 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
     ! Closing the the scanned file:
     CLOSE(UNIT=C%unit_scanning_file_content)
-    CALL FLUSH(C%unit_scanning_file_content)
 
     ! Output: -
     CALL write_the_scanned_projection_data_file(advised_scan_parameter, highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution, maximum_contributions, gcm_to_im_direction = .TRUE.)
@@ -879,6 +846,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
     ! C%scanned_projection_data_filename file. With the indices and the distances of the contributing points the IM fields can be
     ! mapped fast and simultaneously on to the GCM grid.
     USE oblimap_configuration_module, ONLY: dp, C, oblimap_scan_parameter_type
+   !USE MPI
     IMPLICIT NONE
 
     ! Input variables:
@@ -921,6 +889,16 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
     INTEGER                                               :: n_end_previous_iteration          ! The n_end   of the previous iteration in the WHILE-loop
     LOGICAL,       DIMENSION(  C%NX  ,C%NY  )             :: mask
 
+   !INTEGER                                               :: ierror
+   !CHARACTER(4)                                          :: process_label
+   !CHARACTER(256)                                        :: filename_scanned_content
+   !INTEGER                                               :: process_counter
+   !INTEGER                                               :: n_start
+   !INTEGER                                               :: n_end
+   !INTEGER                                               :: highest_scan_search_block_size_reduced
+   !INTEGER                                               :: amount_of_mapped_points_reduced       
+   !INTEGER                                               :: number_points_no_contribution_reduced 
+
     minimum_im_grid_distance = MIN(C%dx, C%dy)
 
     ! Projection of the IM coordinates to the GCM coordinates with the inverse oblique stereographic projection:
@@ -937,6 +915,9 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
     amount_of_mapped_points      = 0
 
     ! Opening the file to which the coordinates of the nearest projected points are written, which will be the content of the scanned file:
+   !WRITE(process_label, '(I0.4)') C%processor_id_process_dependent
+   !filename_scanned_content = TRIM(C%filename_scanned_content)//'-'//TRIM(process_label)
+   !OPEN(UNIT=C%unit_scanning_file_content + C%processor_id_process_dependent, FILE=filename_scanned_content)
     OPEN(UNIT=C%unit_scanning_file_content, FILE=TRIM(C%filename_scanned_content))
 
     ! For each GCM grid point the four nearest projected IM points are determined:
@@ -1104,7 +1085,6 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
     IF(C%scan_search_block_size == -3) highest_scan_search_block_size = highest_scan_search_block_size - 2
     IF(C%oblimap_message_level > 0) WRITE(UNIT=*,FMT='(/A, I6/)') ' The highest dynamic scan_search_block_size was: ', highest_scan_search_block_size
 
-    CALL FLUSH(C%unit_scanning_file_content)
     ! Closing the the scanned file:
     CLOSE(UNIT=C%unit_scanning_file_content)
 
@@ -1354,7 +1334,6 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
     DEALLOCATE(contribution)
 
-    CALL FLUSH(C%unit_scanning_file_content)
     ! Closing the the scanned file:
     CLOSE(UNIT=C%unit_scanning_file_content)
 
@@ -1389,7 +1368,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
     LOGICAL                           , INTENT(IN) :: gcm_to_im_direction                   ! This variable has to be TRUE for the GCM -> IM mapping direction, and FALSE vice versa.
 
     ! Local variables:
-    INTEGER                                        :: unit_number     = 107
+    INTEGER                                        :: unit_number = 107
 
     ! Opening the scanned file:
     OPEN(UNIT=unit_number, FILE=TRIM(C%scanned_projection_data_filename))
@@ -1501,7 +1480,8 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
      WRITE(UNIT=unit_number,  FMT='( I20, A, I8, A)') amount_of_mapped_points, '     # The number of mapped GCM points from which ', number_points_no_contribution, ' points have no contribution.'
     END IF
     WRITE(UNIT=unit_number,   FMT='( A        )') '# '
-    ! Closing the the sid file:
+
+    ! Closing the the scanned file:
     CLOSE(UNIT=unit_number)
   END SUBROUTINE write_the_scanned_projection_data_file
 
