@@ -40,18 +40,19 @@
 PROGRAM oblimap_gcm_to_im_program
   USE oblimap_configuration_module, ONLY: C, initialize_config_variables, oblimap_licence
   USE oblimap_gcm_to_im_mapping_module, ONLY: oblimap_gcm_to_im_mapping
-  USE mpi
+  USE MPI
   IMPLICIT NONE
 
-  INTEGER :: ierr
+  INTEGER :: ierror
   INTEGER :: processor_id_process_dependent
   INTEGER :: number_of_processors
   INTEGER :: error_code
 
-  CALL MPI_Init(ierr)
+  ! Output: ierror
+  CALL MPI_Init(ierror)
 
-  CALL MPI_COMM_RANK(MPI_COMM_WORLD, processor_id_process_dependent, ierr)
-  CALL MPI_COMM_SIZE(MPI_COMM_WORLD, number_of_processors, ierr)
+  CALL MPI_COMM_RANK(MPI_COMM_WORLD, processor_id_process_dependent, ierror)
+  CALL MPI_COMM_SIZE(MPI_COMM_WORLD, number_of_processors, ierror)
   C%processor_id_process_dependent = processor_id_process_dependent
   C%number_of_processors = number_of_processors
 
@@ -62,7 +63,7 @@ PROGRAM oblimap_gcm_to_im_program
    WRITE(UNIT=*, FMT='(A)') ' PROGRAM STOP: You are using too many processors, take less!'
    WRITE(*,*)
    WRITE(*,*)
-   CALL MPI_ABORT(MPI_COMM_WORLD, error_code, ierr)
+   CALL MPI_ABORT(MPI_COMM_WORLD, error_code, ierror)
   END IF
 
   IF(MOD(C%NX, C%number_of_processors) == 0) THEN
@@ -71,7 +72,7 @@ PROGRAM oblimap_gcm_to_im_program
    C%max_nr_of_lines_per_partition_block = (C%NX / C%number_of_processors) + 1
   END IF
   C%psi_process_dependent = C%processor_id_process_dependent * C%max_nr_of_lines_per_partition_block + 1
-  
+
   write(*,*) C%processor_id_process_dependent, ' C%number_of_processors  = ', C%number_of_processors    , 'NY = ', C%NX, ' C%max_nr_of_lines_per_partition_block = ', C%max_nr_of_lines_per_partition_block, 'load unbalance = ', C%number_of_processors * C%max_nr_of_lines_per_partition_block - C%NX
   write(*,*) C%processor_id_process_dependent, ' C%psi_process_dependent = ', C%psi_process_dependent
 
@@ -80,7 +81,8 @@ PROGRAM oblimap_gcm_to_im_program
 
   ! Calling the oblimap_gcm_to_im_mapping :
   CALL oblimap_gcm_to_im_mapping()
-  
-  CALL MPI_Finalize(ierr)
+
+  ! Output: ierror
+  CALL MPI_Finalize(ierror)
 
 END PROGRAM oblimap_gcm_to_im_program
