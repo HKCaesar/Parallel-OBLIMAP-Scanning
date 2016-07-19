@@ -125,6 +125,10 @@ CONTAINS
     INTEGER                                               :: m_end
   !!INTEGER                                               :: n_start
   !!INTEGER                                               :: n_end
+    INTEGER                                               :: highest_scan_search_block_size_reduced
+    INTEGER                                               :: amount_of_mapped_points_reduced       
+    INTEGER                                               :: number_points_no_contribution_reduced 
+   !INTEGER                                               :: maximum_contributions_reduced         
 
     IF(lat_gcm(1,1) < lat_gcm(1,C%NLAT)) THEN
      latitude_parallel_to_grid_numbers = .TRUE.
@@ -452,7 +456,30 @@ CONTAINS
     CLOSE(UNIT=C%unit_scanning_file_content + C%processor_id_process_dependent)
 
     ! Output: -
- write(*,*) C%processor_id_process_dependent
+!write(*,*) C%processor_id_process_dependent
+
+write(*,*) C%processor_id_process_dependent, 'before reduce: ', highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution
+
+! In/Output: highest_scan_search_block_size
+CALL MPI_REDUCE (highest_scan_search_block_size,  highest_scan_search_block_size_reduced, 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
+
+! In/Output: amount_of_mapped_points
+CALL MPI_REDUCE (amount_of_mapped_points       ,  amount_of_mapped_points_reduced       , 1, MPI_INTEGER , MPI_SUM , 0, MPI_COMM_WORLD , ierror)
+
+! In/Output: number_points_no_contribution
+CALL MPI_REDUCE (number_points_no_contribution ,  number_points_no_contribution_reduced , 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
+
+! In/Output: maximum_contributions
+!CALL MPI_REDUCE (maximum_contributions         , maximum_contributions_reduced         , 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
+
+highest_scan_search_block_size = highest_scan_search_block_size_reduced
+amount_of_mapped_points        = amount_of_mapped_points_reduced       
+number_points_no_contribution  = number_points_no_contribution_reduced 
+!maximum_contributions          = maximum_contributions_reduced         
+
+write(*,*)  C%processor_id_process_dependent, 'after reduce: ', highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution
+
+
 IF(C%processor_id_process_dependent == 0) &
     CALL write_the_scanned_projection_data_file(advised_scan_parameter, highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution, maximum_contributions = 4, gcm_to_im_direction = .TRUE.)
 CALL MPI_BARRIER(MPI_COMM_WORLD, ierror)
