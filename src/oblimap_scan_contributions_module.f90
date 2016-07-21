@@ -127,6 +127,10 @@ CONTAINS
     INTEGER                                               :: highest_scan_search_block_size_reduced
     INTEGER                                               :: amount_of_mapped_points_reduced       
     INTEGER                                               :: number_points_no_contribution_reduced 
+    REAL(dp)                                              :: time_start
+    REAL(dp)                                              :: time_end
+    REAL(dp)                                              :: cumulated_processor_time
+    REAL(dp)                                              :: cumulated_processor_time_reduced
 
     IF(lat_gcm(1,1) < lat_gcm(1,C%NLAT)) THEN
      latitude_parallel_to_grid_numbers = .TRUE.
@@ -167,6 +171,7 @@ CONTAINS
      m_end = C%psi_process_dependent + C%max_nr_of_lines_per_partition_block - 1
     END IF
 
+    time_start = MPI_WTIME()
     DO m = m_start, m_end
 
       IF(m >= m_message) THEN
@@ -425,6 +430,15 @@ CONTAINS
 
     END DO
     END DO
+    time_end = MPI_WTIME()
+    cumulated_processor_time = time_end - time_start
+   !write(*,*) C%processor_id_process_dependent, cumulated_processor_time
+    ! In/Output: cumulated_processor_time_reduced
+    CALL MPI_REDUCE (cumulated_processor_time,  cumulated_processor_time_reduced, 1, MPI_DOUBLE , MPI_SUM , 0, MPI_COMM_WORLD , ierror)
+    IF(C%processor_id_process_dependent == 0) THEN
+     OPEN(7000, file='scan-phase-times.txt', status='old', position='append', action='write')
+     WRITE(UNIT=7000, FMT='(I4, 2F8.1, E24.16, A)') C%number_of_processors, 100._dp * cumulated_processor_time_reduced / 0.9_dp, 100._dp * 0.9_dp / cumulated_processor_time_reduced, cumulated_processor_time_reduced, '   gcm-to-im-quadrant'
+    END IF
 
     IF(C%scan_search_block_size == -3) highest_scan_search_block_size = highest_scan_search_block_size - 2
     IF(C%oblimap_message_level > 0) WRITE(UNIT=*,FMT='(/A, I6/)') ' The highest dynamic scan_search_block_size was: ', highest_scan_search_block_size
@@ -435,13 +449,13 @@ CONTAINS
 
    !write(*,*) C%processor_id_process_dependent, 'before reduce: ', highest_scan_search_block_size, amount_of_mapped_points, number_points_no_contribution
 
-    ! In/Output: highest_scan_search_block_size
+    ! In/Output: highest_scan_search_block_size_reduced
     CALL MPI_REDUCE (highest_scan_search_block_size,  highest_scan_search_block_size_reduced, 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
 
-    ! In/Output: amount_of_mapped_points
+    ! In/Output: amount_of_mapped_points_reduced
     CALL MPI_REDUCE (amount_of_mapped_points       ,  amount_of_mapped_points_reduced       , 1, MPI_INTEGER , MPI_SUM , 0, MPI_COMM_WORLD , ierror)
 
-    ! In/Output: number_points_no_contribution
+    ! In/Output: number_points_no_contribution_reduced
     CALL MPI_REDUCE (number_points_no_contribution ,  number_points_no_contribution_reduced , 1, MPI_INTEGER , MPI_MAX , 0, MPI_COMM_WORLD , ierror)
 
     highest_scan_search_block_size = highest_scan_search_block_size_reduced
@@ -898,6 +912,10 @@ CONTAINS
     INTEGER                                               :: highest_scan_search_block_size_reduced
     INTEGER                                               :: amount_of_mapped_points_reduced       
     INTEGER                                               :: number_points_no_contribution_reduced 
+    REAL(dp)                                              :: time_start
+    REAL(dp)                                              :: time_end
+    REAL(dp)                                              :: cumulated_processor_time
+    REAL(dp)                                              :: cumulated_processor_time_reduced
 
     minimum_im_grid_distance = MIN(C%dx, C%dy)
 
@@ -930,6 +948,7 @@ CONTAINS
      i_end = C%psi_process_dependent + C%max_nr_of_lines_per_partition_block - 1
     END IF
 
+    time_start = MPI_WTIME()
     DO i = i_start, i_end
   !!DO i = 1, C%NLON
       IF(i >= i_message) THEN
@@ -1101,6 +1120,15 @@ CONTAINS
       END IF
     END DO
     END DO
+    time_end = MPI_WTIME()
+    cumulated_processor_time = time_end - time_start
+   !write(*,*) C%processor_id_process_dependent, cumulated_processor_time
+    ! In/Output: cumulated_processor_time_reduced
+    CALL MPI_REDUCE (cumulated_processor_time,  cumulated_processor_time_reduced, 1, MPI_DOUBLE , MPI_SUM , 0, MPI_COMM_WORLD , ierror)
+    IF(C%processor_id_process_dependent == 0) THEN
+     OPEN(7000, file='scan-phase-times.txt', status='old', position='append', action='write')
+     WRITE(UNIT=7000, FMT='(I4, 2F8.1, E24.16, A)') C%number_of_processors, 100._dp * cumulated_processor_time_reduced / 0.9_dp, 100._dp * 0.9_dp / cumulated_processor_time_reduced, cumulated_processor_time_reduced, '   im-to-gcm-quadrant'
+    END IF
 
     IF(C%scan_search_block_size == -3) highest_scan_search_block_size = highest_scan_search_block_size - 2
     IF(C%oblimap_message_level > 0) WRITE(UNIT=*,FMT='(/A, I6/)') ' The highest dynamic scan_search_block_size was: ', highest_scan_search_block_size
