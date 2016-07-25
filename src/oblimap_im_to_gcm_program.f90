@@ -72,7 +72,7 @@ PROGRAM oblimap_im_to_gcm_program
    C%max_nr_of_lines_per_partition_block = (C%NLON / C%number_of_processors) + 1
   END IF
   C%psi_process_dependent = C%processor_id_process_dependent * C%max_nr_of_lines_per_partition_block + 1
-  
+
   write(*,*) C%processor_id_process_dependent, ' C%number_of_processors  = ', C%number_of_processors    , 'NY = ', C%NLON, ' C%max_nr_of_lines_per_partition_block = ', C%max_nr_of_lines_per_partition_block, 'load unbalance = ', C%number_of_processors * C%max_nr_of_lines_per_partition_block - C%NLON
   write(*,*) C%processor_id_process_dependent, ' C%psi_process_dependent = ', C%psi_process_dependent
 

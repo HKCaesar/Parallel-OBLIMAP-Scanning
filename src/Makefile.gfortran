@@ -1,7 +1,7 @@
 # Configuration for the fortran gfortran compiler (Ubuntu):
 
 # Compiler names:
-  F90 = gfortran
+  F90 = mpif90
 
 # Setting the path for the netcdf libraries:
   NETCDF_PATH = /usr
