@@ -1,17 +1,15 @@
-# Configuration for the fortran ifort compiler (Lisa):
+# Configuration for the fortran ifort compiler (Comet at XSEDE):
 
 # To use the ifort compiler the following modules have to be loaded:
-#   module load fortran netcdf/intel
+#   module load fortran netcdf
 
 # Compiler names:
   F90 = mpif90
 
 # Setting the path for the netcdf libraries:
-# See: echo ${SARA_NETCDF_INCLUDE}; echo ${SARA_NETCDF_LIB}
   NETCDF_PATH = /opt/netcdf/4.3.2/intel/mvapich2_ib/
 
 # Compiler flags:
-  #COMPILER_FLAGS_BASIC    = -O3 -ipo -no-prec-div -module ${MOD_PATH}
   COMPILER_FLAGS_BASIC    = -O3 -no-prec-div -module ${MOD_PATH}
   COMPILER_FLAGS_CHECK    = #-traceback
   COMPILER_FLAGS_NETCDF   = -I${NETCDF_PATH}/include
