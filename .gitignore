@@ -29,8 +29,8 @@
 
 
 oblimap_gcm_to_im_program
-*.txt
-!oblimap-results
-!oblimap-results/oblimap-scanned-projection-data
-!src/module-files
-!src/object-files
+oblimap_im_to_gcm_program
+oblimap_convert_program
+oblimap-results/oblimap-scanned-projection-data/scanned-*
+content_scanned_file.txt-*
+scan-phase-times.txt

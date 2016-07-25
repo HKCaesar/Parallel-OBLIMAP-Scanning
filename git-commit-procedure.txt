@@ -1,0 +1,23 @@
+ A git checkout goes like:
+  git clone https://github.com/polar-computing/Parallel-OBLIMAP-Scanning.git
+
+
+ Commiting changes goes like:
+
+  git status
+  git diffsrc/oblimap_gcm_to_im_program.f90
+  git pull origin master
+  git status
+  
+  git add src/oblimap_gcm_to_im_program.f90 src/oblimap_scan_contributions_module.f90
+  git status
+  git commit -m 'The actual axis to split the partition blocks should be the x-axis for the gcm to im mapping, so this is changed. The Full scan has always enforced by checking the very first point (i.e. m==1,n==1), however now the m==1 cases are replaced by m==m_start.'
+  git status
+  git push origin master
+  git status
+  git pull origin master
+
+ Miscellaneous:
+
+  git diff filename
+  git diff 
