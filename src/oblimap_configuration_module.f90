@@ -288,6 +288,18 @@ MODULE oblimap_configuration_module
       TYPE(constants_type), SAVE :: C
 
 
+      ! This TYPE contains variables which are related to the parallel OBLIMAP implementation using MPI.
+      TYPE parallel_type
+        INTEGER :: processor_id_process_dependent
+        INTEGER :: number_of_processors
+        INTEGER :: max_nr_of_lines_per_partition_block ! The maximum numberr of lines per partition block
+        INTEGER :: psi_process_dependent               ! Partition starting index
+      END TYPE parallel_type
+
+      ! PAR is the 'struct' containing the parallel OBLIMAP implementation using MPI.
+      TYPE(parallel_type), SAVE :: PAR
+
+
       TYPE oblimap_scan_parameter_type
         ! This struct contains some crucial scan parameters.
         LOGICAL  :: data_set_is_cyclic_in_longitude ! This should be TRUE for GCM to IM mapping if the gcm data set is cyclic in longitude, i.e. the gcm grid covers the entire 0-360 degrees longitude range

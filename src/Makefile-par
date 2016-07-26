@@ -1,4 +1,4 @@
-# File name: Makefile
+# File name: Makefile-par
 #
 # Copyright (C) 2016 Thomas Reerink.
 #
@@ -41,22 +41,23 @@
 #    Makefile for compiling OBLIMAP
 #
 #    Execute options of this Makefile (in the src/ directory) e.g.:
-#     make clean
-#     make all
-#     make oblimap_gcm_to_im_program
-#     make oblimap_im_to_gcm_program
-#     make oblimap_convert_program
+#     make -f Makefile-par clean
+#     make -f Makefile-par all
+#     make -f Makefile-par oblimap_par_gcm_to_im_program
+#     make -f Makefile-par oblimap_par_im_to_gcm_program
+#     make -f Makefile-par oblimap_convert_program
 
 #    For "make" syntax search on "make tutorial", or see:
 #     http://www.gnu.org/software/make/manual/make.html
 
 # Include below the Makefile.include which matches with your fortran compiler:
-include Makefile.gfortran
-#include Makefile.gfortran-mp-4.9-mac
-#include Makefile.gfortran-lisa
-#include Makefile.ifort-lisa
-#include Makefile.ifort-staff.science
-#include Makefile.ftn-cca-ecmwf
+include Makefile-par.gfortran
+#include Makefile-par.gfortran-mac
+##include Makefile-par.gfortran-lisa
+#include Makefile-par.ifort-lisa
+##include Makefile-par.ifort-staff.science
+##include Makefile-par.ftn-cca-ecmwf
+#include Makefile-par.ifort-stampede
 
 # The OBJ_PATH and the MOD_PATH are defined:
 OBJ_PATH = object-files
@@ -73,46 +74,46 @@ $(OBJ_PATH)/%.o : %.f90
 
 
 # =============================================================
-#       Building the oblimap_gcm_to_im_program
+#       Building the oblimap_par_gcm_to_im_program
 # =============================================================
 
 # Adding this program to the list of all programs:
-all_programs += oblimap_gcm_to_im_program
+all_programs += oblimap_par_gcm_to_im_program
 
-# List of object files for oblimap_gcm_to_im_program:
-oblimap_gcm_to_im_program_objects = \
+# List of object files for oblimap_par_gcm_to_im_program:
+oblimap_par_gcm_to_im_program_objects = \
         oblimap_configuration_module.o \
         oblimap_read_and_write_module.o \
         oblimap_projection_module.o \
-        oblimap_scan_contributions_module.o \
+        oblimap_par_scan_contributions_module.o \
         oblimap_mapping_module.o \
         oblimap_gcm_to_im_mapping_module.o \
-        oblimap_gcm_to_im_program.o
+        oblimap_par_gcm_to_im_program.o
 
 # The executable (the target) depends on the object files:
-oblimap_gcm_to_im_program : $(oblimap_gcm_to_im_program_objects:%=$(OBJ_PATH)/%)
+oblimap_par_gcm_to_im_program : $(oblimap_par_gcm_to_im_program_objects:%=$(OBJ_PATH)/%)
 
 
 
 # =============================================================
-#       Building the oblimap_im_to_gcm_program
+#       Building the oblimap_par_im_to_gcm_program
 # =============================================================
 
 # Adding this program to the list of all programs:
-all_programs += oblimap_im_to_gcm_program
+all_programs += oblimap_par_im_to_gcm_program
 
-# List of object files for oblimap_im_to_gcm_program:
-oblimap_im_to_gcm_program_objects = \
+# List of object files for oblimap_par_im_to_gcm_program:
+oblimap_par_im_to_gcm_program_objects = \
         oblimap_configuration_module.o \
         oblimap_read_and_write_module.o \
         oblimap_projection_module.o \
-        oblimap_scan_contributions_module.o \
+        oblimap_par_scan_contributions_module.o \
         oblimap_mapping_module.o \
         oblimap_im_to_gcm_mapping_module.o \
-        oblimap_im_to_gcm_program.o
+        oblimap_par_im_to_gcm_program.o
 
 # The executable (the target) depends on the object files:
-oblimap_im_to_gcm_program : $(oblimap_im_to_gcm_program_objects:%=$(OBJ_PATH)/%)
+oblimap_par_im_to_gcm_program : $(oblimap_par_im_to_gcm_program_objects:%=$(OBJ_PATH)/%)
 
 
 
